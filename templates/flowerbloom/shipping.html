@@ -1,0 +1,172 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+        <title>Flower Shop</title>
+    
+        <link href="{% static 'images/favicon.ico ' %}" rel="shortcut icon" type="image/x-icon">
+    
+        <!-- jQuery -->
+        <script src="{% static 'flowerbloom/js/jquery-3.5.1.slim.min.js' %}" type="text/javascript"></script>
+    
+        <!-- Bootstrap -->
+        <script src="{% static 'flowerbloom/js/bootstrap.min.js' %}" type="text/javascript"></script>
+        <script src="{% static 'flowerbloom/js/popper.min.js' %}" type="text/javascript"></script>
+        <link href="{% static 'flowerbloom/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet">
+    
+        <!-- FontAwesome 5 -->
+        <link href="{% static 'flowerbloom/fonts/fontawesome/css/all.min.css' %}" type="text/css" rel="stylesheet">
+    
+        <!-- Google Fonts -->
+        <link href="//fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,615;0,700;0,800;1,400;1,500;1,600;1,615;1,700;1,800&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+        <!-- Custom Style -->
+        <link href="{% static 'flowerbloom/css/style.css' %}" type="text/css" rel="stylesheet">
+    
+        <!-- Custom JavaScript -->
+        <script src="{% static 'flowerbloom/js/script.js' %}" type="text/javascript"></script>
+    
+        <!-- Slick Slider -->
+        <link rel="stylesheet" type="text/css" href="{% static 'flowerbloom/css/slick.css' %}" />
+        <script type="text/javascript" src="{% static 'flowerbloom/js/slick.min.js' %}"></script>
+    </head>
+
+<body>
+    <div class="container">
+        {% include './header.html' %}
+        <h1>Order Summary</h1>
+        <div class="row">
+            <div class="col-12 mt-4 mb-4">
+                <h1 class="text-center">Order Summary</h1>
+            </div>
+        </div>
+        <table class="table align-middle mb-0 bg-white">
+            <thead class="bg-light">
+            <tr>
+                <th>#</th>
+                <th>Nama Produk</th>
+                <th>Harga</th>
+                <th>Quantity</th>  
+                <th>Total Harga</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for pItem in keranjang.produk_items.all %}
+                <tr>
+                    <td scope="row">
+                        {{ forloop.counter }}
+                    </td>
+                    <td>
+                        <a href="{% url 'toko:produk-detail' pItem.produk_item.slug %}">
+                            <div class="d-flex align-items-center">
+                                <img
+                                    src="{{ pItem.produk_item.gambar.url }}"
+                                    alt=""
+                                    style="width: 45px; height: 45px"
+                                    class="rounded-circle"
+                                    />
+                                <div class="ms-3">
+                                <p class="fw-bold mb-1">{{ pItem.produk_item.nama_produk }}</p>
+                                <p class="text-muted mb-0"> {{ pItem.produk_item.deskripsi|truncatewords:10 }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    </td>
+                    <td>
+                        <div>$
+                            {% if pItem.produk_item.harga_diskon %}
+                            {{ pItem.produk_item.harga_diskon }}
+                            {% else %}
+                            {{ pItem.produk_item.harga }}
+                            {% endif %}
+                        </div>
+                    </td>
+                    <!--ori
+                    <td>{{ pItem.quantity }}</td>   -->
+                    <!--tambahan-->
+                    <td>
+                        <a href="{%url 'toko:remove_single_item_from_cart' pItem.produk_item.slug %}"><i class="fas fa-minus mr-0.1"></i></a>
+                        {{ pItem.quantity }}
+                        <a href="{%url 'toko:add-to-cart' pItem.produk_item.slug %}"><i class="fas fa-plus mr-1"></i></a>
+                    </td>
+    
+                    <!--sampai sini-->
+    
+                
+                <!---->
+                    <td>                
+                        {% if pItem.produk_item.harga_diskon %}
+                        ${{ pItem.get_total_harga_diskon_item }}
+                        <span class="badge badge-danger rounded-pill d-inline">Hemat ${{ pItem.get_total_hemat_item }}</span>
+                        {% else %}
+                        ${{ pItem.get_total_harga_item }}
+                        {% endif %}
+    
+    
+                    <!--tambahan-->
+                    <a href="{%url 'toko:remove_from_cart' pItem.produk_item.slug %}">
+                        <i class="fas fa-trash fa-align-right"></i>
+                    </a> 
+                    <!--sampai sini-->
+    
+    
+    
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan='5'>Keranjang kosong</td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                    <a class="btn btn-primary float-end" href="{% url 'toko:home-produk-list' %}">Lanjut belanja</a>
+                    </td>
+                </tr>
+                {% endfor %}
+    
+                {% if keranjang.get_total_harga_order %}
+                <tr>
+                    <td colspan="4"><b>Total Belanja</b></td>
+                    <td><b>${{ keranjang.get_total_harga_order }}</b>
+                        {% if keranjang.get_total_hemat_order %}
+                        <span class="badge badge-danger">Hemat ${{ keranjang.get_total_hemat_order }}</span>
+                        {% endif %}
+                    </td>
+      
+                </tr>
+    
+                <tr>
+                    <td colspan="5">
+                    <a class='btn btn-info float-end ml-2' href="{% url 'toko:checkout' %}">Checkout</a>
+                    <a class='btn btn-danger' href="{% url 'toko:home-produk-list' %}">Lanjut belanja</a>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+      </table>
+    <!--tambahan code button +- 
+    <script>
+        const quantity = document.getElementByID("quantity");
+        let quantityValue = quantity.value;
+    
+        function handleCounterPlus() {
+            quantity.value = ++quantityValue;
+        }
+    
+        function handleCounterMin() {
+            if (quantity.value>1){
+                quantity.value = --quantityValue;
+         }
+        }
+    </script>
+    
+    batas tambahan
+    -->   
+    
+        {% include './footer.html' %}
+    </div>
+</body>
+</html>
